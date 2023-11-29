@@ -1,0 +1,21 @@
+%{
+#include<stdio.h>
+int c=0;
+int v=0;
+%}
+%%
+[aeiouAEIOU] { v++; }
+[A-Za-z] { c++; } 
+%%
+int yywrap()
+{
+return 1;
+}
+int main()
+{
+printf("enter the string: ");
+yylex();
+printf("no of vowels: %d\n",v);
+printf("no of consonats: %d\n",c);
+return 0;
+}
