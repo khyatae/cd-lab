@@ -1,0 +1,67 @@
+#include<iostream>
+using namespace std;
+
+int main()
+{
+ string st;
+ printf("enter the string: ");
+ cin>>st;
+ int state=0;
+ for(int i=0;i<st.length();i++)
+ {
+  switch(state)
+  {
+   case 0:
+       if(st[i]=='1')
+       {
+           state=3;
+       }
+       else
+       {
+           state=1;
+       }
+       break;
+   case 1:
+       if(st[i]=='1')
+       {
+           state=2;
+       }
+       else
+       {
+           state=0;
+       }
+       break;
+    case 2:
+       if(st[i]=='1')
+       {
+           state=1;
+       }
+       else
+       {
+           state=3;
+       }
+       break;
+    case 3:
+       if(st[i]=='1')
+       {
+           state=0;
+       }
+       else
+       {
+           state=2;
+       }
+       break;
+
+
+  }
+ }
+ if(state==0)
+ {
+     cout<<"given string is accepted";
+ }
+ else
+ {
+     cout<<"not accepted";
+ }
+ return 0;
+}
