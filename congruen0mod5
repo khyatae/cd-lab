@@ -1,0 +1,17 @@
+%{#include<stdio.h>
+#include<math.h>
+%}
+%%
+1.* { int i,s=0,j=0; for(i=yyleng-1;i>=0;i--,j++){s+=pow(2,j)*((int)(yytext[i]-'0'));} printf("%d\n",s); if(s%5==0){printf("accepted");} else{printf("not accepted");} }
+.* { printf("not accepted"); }
+%%
+int yywrap()
+{
+ return 1;
+}
+int main()
+{
+ printf("enter the string: ");
+ yylex();
+ return 0;
+}
