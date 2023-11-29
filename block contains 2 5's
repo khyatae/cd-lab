@@ -1,0 +1,27 @@
+%{
+#include<stdio.h>
+int f=0;
+%}
+%%
+[0-9]* { if(yyleng<5){return;} int i; for(i=0;i<=yyleng-5;i++){int c=0; if((int)(yytext[i]-'0') == 5){c++;} if((int)(yytext[i+1]-'0') == 5){c++;} if((int)(yytext[i+2]-'0') == 5){c++;} 
+                             if((int)(yytext[i+3]-'0') == 5){c++;} if((int)(yytext[i+4]-'0') == 5){c++;} if(c>=2){f=1;} else{f=0; return;}} }
+%%
+int yywrap()
+{
+return 1;
+}
+int main()
+{
+ printf("enter the string");
+ yylex();
+ if(f==0)
+ {
+ printf("not accepted");
+ }
+ else
+ {
+ printf("accepted");
+ }
+ getch();
+ return 0;
+}
