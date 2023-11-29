@@ -1,0 +1,85 @@
+#include <stdio.h>
+#include <string.h>
+
+char s[100];
+char* c = s;
+
+int match(char expected) {
+    if (*c == expected) {
+        c++;
+        return 1;
+    }
+    return 0;
+}
+
+int F() {
+    if (*c == '(') {
+        printf("%-16s F -> ( E )\n", c);
+        if (match('(') && E() && match(')')) {
+            return 1;
+        }
+        return 0;
+    } else if (*c == 'i') {
+        printf("%-16s F -> i\n", c);
+        if(match('i'))
+        {
+         return 1;
+        }
+    }
+    return 0;
+}
+
+int T() {
+    printf("%-16s T -> F T'\n", c);
+    if (F() && Tdash()) {
+        return 1;
+    }
+    return 0;
+}
+
+int Tdash() {
+    if (*c == '*') {
+        printf("%-16s T' -> * F T'\n", c);
+        if (match('*') && F() && Tdash()) {
+            return 1;
+        }
+        return 0;
+    }
+    printf("%-16s T' -> $\n", c);
+    return 1;
+}
+
+int E() {
+    printf("%-16s E -> T E'\n", c);
+    if (T() && Edash()) {
+        return 1;
+    }
+    return 0;
+}
+
+int Edash() {
+    if (*c == '+') {
+        printf("%-16s E' -> + T E'\n", c);
+        if (match('+') && T() && Edash()) {
+            return 1;
+        }
+        return 0;
+    }
+    printf("%-16s E' -> $\n", c);
+    return 1;
+}
+
+int main() {
+    printf("enter the string: ");
+    scanf("%s", s);
+    printf("INPUT           ACTION\n");
+    printf("-------------------------------------\n");
+
+    if (E() && *c == '\0') {
+        printf("---------------------------------\nparsing is successful");
+    } else {
+        printf("---------------------------------\nparsing is not successful");
+    }
+
+    return 0;
+}
