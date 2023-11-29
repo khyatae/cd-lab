@@ -1,0 +1,207 @@
+#include <iostream>
+#include <map>
+#include <vector>
+using namespace std;
+
+int main()
+{
+    map<pair<char, char>, char> precedence_table;
+    precedence_table[{'+', '+'}] = '>';
+    precedence_table[{'+', '*'}] = '<';
+    precedence_table[{'+', ')'}] = '<';
+    precedence_table[{'+', '('}] = '<';
+    precedence_table[{'+', 'd'}] = '<';
+    precedence_table[{'+', '$'}] = '>';
+    precedence_table[{'+', '0'}] = '<';
+    precedence_table[{'+', '1'}] = '<';
+    precedence_table[{'+', '2'}] = '<';
+    precedence_table[{'*', '+'}] = '>';
+    precedence_table[{'*', '*'}] = '>';
+    precedence_table[{'*', ')'}] = '<';
+    precedence_table[{'*', '('}] = '<';
+    precedence_table[{'*', 'd'}] = '<';
+    precedence_table[{'*', '$'}] = '>';
+    precedence_table[{'*', '0'}] = '<';
+    precedence_table[{'*', '1'}] = '<';
+    precedence_table[{'*', '2'}] = '<';
+    precedence_table[{')', '+'}] = '>';
+    precedence_table[{')', '*'}] = '>';
+    precedence_table[{')', '('}] = '>';
+    precedence_table[{')', ')'}] = '>';
+    precedence_table[{')', 'd'}] = '<';
+    precedence_table[{')', '$'}] = '>';
+    precedence_table[{')', '0'}] = '<';
+    precedence_table[{')', '1'}] = '<';
+    precedence_table[{')', '2'}] = '<';
+    precedence_table[{'(', '+'}] = '>';
+    precedence_table[{'(', '*'}] = '>';
+    precedence_table[{'(', '('}] = '>';
+    precedence_table[{'(', ')'}] = '<';
+    precedence_table[{'(', 'd'}] = '<';
+    precedence_table[{'(', '$'}] = '>';
+    precedence_table[{'(', '0'}] = '<';
+    precedence_table[{'(', '1'}] = '<';
+    precedence_table[{'(', '2'}] = '<';
+    precedence_table[{'d', '+'}] = '>';
+    precedence_table[{'d', '*'}] = '>';
+    precedence_table[{'d', '('}] = '>';
+    precedence_table[{'d', ')'}] = '>';
+    precedence_table[{'d', 'd'}] = '-';
+    precedence_table[{'d', '$'}] = '>';
+    precedence_table[{'d', '0'}] = '>';
+    precedence_table[{'d', '1'}] = '>';
+    precedence_table[{'d', '2'}] = '>';
+    precedence_table[{'$', '+'}] = '<';
+    precedence_table[{'$', '*'}] = '<';
+    precedence_table[{'$', '('}] = '<';
+    precedence_table[{'$', ')'}] = '<';
+    precedence_table[{'$', 'd'}] = '<';
+    precedence_table[{'$', '$'}] = 'a';
+    precedence_table[{'$', '0'}] = '<';
+    precedence_table[{'$', '1'}] = '<';
+    precedence_table[{'$', '2'}] = '<';
+    precedence_table[{'1', '+'}] = '>';
+    precedence_table[{'1', '*'}] = '>';
+    precedence_table[{'1', '('}] = '>';
+    precedence_table[{'1', ')'}] = '>';
+    precedence_table[{'1', 'd'}] = '>';
+    precedence_table[{'1', '$'}] = '>';
+    precedence_table[{'1', '0'}] = '-';
+    precedence_table[{'1', '1'}] = '-';
+    precedence_table[{'1', '2'}] = '-';
+    precedence_table[{'0', '+'}] = '>';
+    precedence_table[{'0', '*'}] = '>';
+    precedence_table[{'0', '('}] = '>';
+    precedence_table[{'0', ')'}] = '>';
+    precedence_table[{'0', 'd'}] = '>';
+    precedence_table[{'0', '$'}] = '>';
+    precedence_table[{'0', '0'}] = '-';
+    precedence_table[{'0', '1'}] = '-';
+    precedence_table[{'0', '2'}] = '-';
+    precedence_table[{'2', '+'}] = '>';
+    precedence_table[{'2', '*'}] = '>';
+    precedence_table[{'2', '('}] = '>';
+    precedence_table[{'2', ')'}] = '>';
+    precedence_table[{'2', 'd'}] = '>';
+    precedence_table[{'2', '$'}] = '>';
+    precedence_table[{'2', '0'}] = '-';
+    precedence_table[{'2', '1'}] = '-';
+    precedence_table[{'2', '2'}] = '-';
+
+    int n;
+    vector<string> grammar;
+    cout << "Enter the number of productions: ";
+    cin >> n;
+    cout << "Enter production rules:\n";
+    for (int i = 0; i < n; i++)
+    {
+        string x;
+        cin >> x;
+        grammar.push_back(x);
+    }
+
+    string x;
+    cout << "Enter input string: ";
+    cin >> x;
+    x += '$';
+    vector<char> s(x.begin(), x.end());
+
+    vector<char> st;
+    st.push_back('$');
+
+    cout << "Stack\tRelation\tInput\tComment\n";
+    int my_temp = 0;
+    while (true)
+    {
+        if (my_temp == 20)
+        {
+            break;
+        }
+        my_temp += 1;
+        if (st[st.size() - 1] == '$' && s[0] == '$')
+        {
+            break;
+        }
+        int i = st.size() - 1;
+        while (isupper(st[i]))
+        {
+            i -= 1;
+        }
+        char relation = precedence_table[{st[i], s[0]}];
+
+        cout << " ";
+        for (char c : st)
+        {
+            cout << c;
+        }
+        cout << "\t  " << relation << "\t\t";
+        for (char c : s)
+        {
+            cout << c;
+        }
+
+        if (relation == 'a')
+        {
+            cout << "\tParsed successfully\n";
+            break;
+        }
+        else if (relation == '<')
+        {
+            cout << "\tShift " << s[0] << "\n";
+            st.push_back(s[0]);
+            s.erase(s.begin());
+        }
+        else if (relation == '>')
+        {
+            char prodlhs;
+            int prodno;
+            int k = st.size() - 1;
+            string curr = "";
+            int flag = 0;
+            while (k >= 0)
+            {
+                curr += st[k];
+                for (int j = 0; j < n; j++)
+                {
+                    string d = "";
+                    for (int y = 2; y < grammar[j].length(); y++)
+                    {
+                        d += grammar[j][y];
+                    }
+                    if (d == curr)
+                    {
+                        prodlhs = grammar[j][0];
+                        prodno = j;
+                        flag = 1;
+                        break;
+                    }
+                }
+                if (flag == 1)
+                {
+                    break;
+                }
+                k -= 1;
+            }
+            if (k == -1)
+            {
+                cout << "\tGiven string can't be parsed\n";
+                break;
+            }
+            int cnt = grammar[prodno].size() - 2;
+            cout << "\tReduce " << grammar[prodno] << "\n";
+            while (cnt > 0)
+            {
+                st.pop_back();
+                cnt -= 1;
+            }
+            st.push_back(prodlhs);
+        }
+    }
+
+    if (st[st.size() - 1] == '$' && s[0] == '$')
+    {
+        cout << "Parsed successfully\n";
+    }
+
+    return 0;
+}
