@@ -1,0 +1,18 @@
+%{
+#include<stdio.h>
+%}
+%%
+.*00 { printf("accepted"); }
+.* { printf("not accepted"); }
+%%
+int yywrap()
+{
+return 1;
+}
+int main()
+{
+ printf("enter the string");
+ yylex();
+ getch();
+ return 0;
+}
