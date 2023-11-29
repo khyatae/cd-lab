@@ -1,0 +1,347 @@
+#include <iostream>
+#include <vector>
+#include <map>
+#include <set>
+#include<stack>
+using namespace std;
+
+void find_first(char non_terminal, vector<string>& grammar, map<char, set<char>>& first_arr)
+{
+    if (first_arr.find(non_terminal) != first_arr.end())
+    {
+        return;
+    }
+
+    set<char> first_set;
+
+    for (string production : grammar)
+    {
+        if (production[0] == non_terminal)
+        {
+            int j = 2;
+            while (j < production.size())
+            {
+                if (production[j] == '@')
+                {
+                    first_set.insert('@');
+                    break;
+                }
+                else if (production[j] >= 'A' && production[j] <= 'Z')
+                {
+                    find_first(production[j], grammar, first_arr);
+                    first_set.insert(first_arr[production[j]].begin(), first_arr[production[j]].end());
+                    first_set.erase('@');
+                    if (first_arr[production[j]].find('@') == first_arr[production[j]].end())
+                    {
+                        break;
+                    }
+                }
+                else
+                {
+                    first_set.insert(production[j]);
+                    break;
+                }
+                ++j;
+            }
+            if(j==production.size())
+            {
+                first_set.insert('@');
+            }
+        }
+    }
+
+    first_arr[non_terminal] = first_set;
+}
+
+
+void compute_first(vector<string> grammar, map<char, set<char>>& first_arr)
+{
+    for (string production : grammar)
+    {
+        find_first(production[0], grammar, first_arr);
+    }
+}
+
+void find_follow(char non_terminal, vector<string>& grammar, map<char, set<char>>& follow_arr,map<char, set<char>>& first_arr)
+{
+    if (follow_arr.find(non_terminal) != follow_arr.end())
+    {
+        return;
+    }
+
+    set<char> follow_set;
+    if(non_terminal==grammar[0][0])
+    {
+     follow_set.insert('$');
+    }
+
+    for (string production : grammar)
+    {
+        for(int pos=2;pos<production.size();pos++)
+        {
+        char st=production[pos];
+        if (st == non_terminal)
+        {
+            int j = pos+1;
+            while (j < production.size())
+            {
+
+                if (production[j] >= 'A' && production[j] <= 'Z')
+                {
+
+                    follow_set.insert(first_arr[production[j]].begin(), first_arr[production[j]].end());
+                    if (first_arr[production[j]].find('@') == first_arr[production[j]].end())
+                    {
+                        break;
+                    }
+                }
+                else
+                {
+                    follow_set.insert(production[j]);
+                    break;
+                }
+                ++j;
+            }
+            if(j==production.size() && production[0]!=non_terminal)
+            {
+                find_follow(production[0],grammar,follow_arr,first_arr);
+                follow_set.insert(follow_arr[production[0]].begin(), follow_arr[production[0]].end());
+            }
+        }
+    }
+    }
+    follow_set.erase('@');
+    follow_arr[non_terminal] = follow_set;
+}
+
+void compute_follow(vector<string> grammar, map<char, set<char>>& follow_arr,map<char, set<char>>& first_arr)
+{
+    for (string production : grammar)
+    {
+        for(char non_terminal:production)
+        {
+         if(non_terminal>='A' && non_terminal<='Z')
+         {
+         find_follow(non_terminal, grammar, follow_arr,first_arr);
+         }
+        }
+    }
+}
+
+void parser_first(vector<string> grammar,map<char, set<char>> first_arr,map<char, set<char>> follow_arr,map<int,set<char>>& first_set)
+{
+ for(int i=0;i<grammar.size();i++)
+ {
+    int j = 2;
+    while (j < grammar[i].size())
+    {
+        if (grammar[i][j] == '@')
+        {
+                    first_set[i].insert('@');
+                    break;
+         }
+        else if (grammar[i][j] >= 'A' && grammar[i][j] <= 'Z')
+            {
+                    first_set[i].insert(first_arr[grammar[i][j]].begin(), first_arr[grammar[i][j]].end());
+                    first_set[i].erase('@');
+                    if (first_arr[grammar[i][j]].find('@') == first_arr[grammar[i][j]].end())
+                    {
+                        break;
+                    }
+                }
+                else
+                {
+                    first_set[i].insert(grammar[i][j]);
+                    break;
+                }
+                ++j;
+            }
+            if(j==grammar[i].size())
+            {
+                first_set[i].insert('@');
+            }
+ }
+}
+
+void find_terminals(vector<string> grammar,set<char>& terminals_set,set<char>& non_terminals_set)
+{
+    for(int i=0;i<grammar.size();i++)
+    {
+        non_terminals_set.insert(grammar[i][0]);
+        int j=2;
+        while(j<grammar[i].size())
+        {
+            if(grammar[i][j]>='A' && grammar[i][j]<='Z')
+            {
+                non_terminals_set.insert(grammar[i][j]);
+            }
+            else
+            {
+                terminals_set.insert(grammar[i][j]);
+            }
+            j++;
+        }
+        terminals_set.insert('$');
+        terminals_set.erase('@');
+
+    }
+}
+void construct(vector<string> grammar,map<char, set<char>> first_arr,map<char, set<char>> follow_arr,map<pair<char,char>,string>& parsing_table)
+{
+ map<int,set<char>> parser_first_arr;
+ parser_first(grammar,first_arr,follow_arr,parser_first_arr);
+ /*for (auto x : parser_first_arr)
+    {
+        cout << "FIRST(" << x.first << ") = {";
+        for (char terminal : x.second)
+        {
+            cout << terminal << ",";
+        }
+        cout << "}\n";
+    }*/
+  set<char> terminals_set;
+  set<char> non_terminals_set;
+  find_terminals(grammar,terminals_set,non_terminals_set);
+  for(char x:non_terminals_set)
+  {
+      for(char y:terminals_set)
+      {
+          parsing_table[make_pair(x,y)]="";
+      }
+  }
+  for(int i=0;i<grammar.size();i++)
+  {
+      if(parser_first_arr[i].find('@')!=parser_first_arr[i].end())
+      {
+          for(char x:follow_arr[grammar[i][0]])
+          {
+              parsing_table[make_pair(grammar[i][0],x)]=grammar[i];
+          }
+      }
+      else
+      {
+          for(char x:parser_first_arr[i])
+          {
+              parsing_table[make_pair(grammar[i][0],x)]=grammar[i];
+          }
+      }
+  }
+
+  /*for(char x:non_terminals_set)
+  {
+      for(char y:terminals_set)
+      {
+          cout<<parsing_table[make_pair(x,y)]<<"\t";
+      }
+      cout<<"\n";
+  }*/
+
+}
+
+void parse_input( map<pair<char,char>,string> parsing_table,string input,char start)
+{
+    stack<char> stk;
+    stk.push('$');
+    stk.push(start);
+    int i=0;
+    cout<<"stack\t\tinput\t\toutput\n";
+    while(stk.top()!='$')
+    {
+        /*for(auto x:stk)
+        {
+            cout<<x;
+        }*/
+
+        cout<<"\n"<<stk.top()<<"\t";
+        for(int j=i;j<input.length();j++)
+        {
+            cout<<input[j];
+        }
+        if(stk.top()>='A' && stk.top()<='Z')
+        {
+            string n_str=parsing_table[make_pair(stk.top(),input[i])];
+            string new_str="";
+            for(int j=2;j<n_str.size();j++)
+            {
+                new_str+=n_str[j];
+            }
+            cout<<"\t\t"<<n_str<<"\n";
+            stk.pop();
+            if(new_str[0]!='@')
+            {
+
+            for(int j=new_str.length()-1;j>=0;j--)
+            {
+                stk.push(new_str[j]);
+            }
+            }
+        }
+        else if(stk.top()==input[i])
+        {
+            stk.pop();
+            i++;
+            cout<<"\n";
+        }
+        else
+        {
+            break;
+        }
+    }
+    if(input[i]=='$')
+    {
+        cout<<"\n parsing is successful";
+    }
+    else
+    {
+        cout<<"\nstring can't be parsed\n";
+    }
+}
+int main()
+{
+    int n;
+    cout << "Enter the number of productions: ";
+    cin >> n;
+
+    vector<string> grammar(n, "");
+    cout << "Enter the productions:\n";
+    for (int i = 0; i < n; i++)
+    {
+        cin >> grammar[i];
+    }
+
+    map<char, set<char>> first_arr;
+    compute_first(grammar, first_arr);
+
+    for (auto x : first_arr)
+    {
+        cout << "FIRST(" << x.first << ") = {";
+        for (char terminal : x.second)
+        {
+            cout << terminal << ",";
+        }
+        cout << "}\n";
+    }
+
+
+    map<char, set<char>> follow_arr;
+    compute_follow(grammar, follow_arr,first_arr);
+
+    for (auto x : follow_arr)
+    {
+        cout << "FOLLOW(" << x.first << ") = {";
+        for (char terminal : x.second)
+        {
+            cout << terminal << ",";
+        }
+        cout << "}\n";
+    }
+
+    map<pair<char,char>,string> parsing_table;
+    construct(grammar,first_arr,follow_arr,parsing_table);
+    string input;
+    cout<<"enter input string : ";
+    cin>>input;
+    input+='$';
+    parse_input(parsing_table,input,grammar[0][0]);
+    return 0;
+}
