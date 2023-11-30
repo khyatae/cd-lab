@@ -1,0 +1,73 @@
+#include<iostream>
+#include<string>
+using namespace std;
+class Predictive_P {
+private:
+    string s;
+    int i;
+    char current_token;
+public:
+    Predictive_P(const string& str){
+        s=str;
+        i=0;
+        current_token='\0';
+        }
+    void parse() {
+        current_token = get_next_token();
+        parse_S();
+        if (current_token == '$') {
+            cout << "Parsing successful." << endl;
+        } else {
+            cout << "Parsing failed." << endl;
+        }
+    }
+private:
+    char get_next_token() {
+        if (i < s.size()) {
+            char token = s[i];
+            ++i;
+            return token;
+        } 
+        else {
+            return '$';
+        }
+    }
+    void match(char e_token) {
+        if (current_token == e_token) {
+            current_token = get_next_token();
+        } 
+        else {
+            exit(1);
+        }
+    }
+    void parse_S() {
+        if (current_token == 'a') {
+            match('a');
+            parse_B();
+            match('a');
+        }
+        else {
+            exit(1);
+        }
+    }
+    void parse_B() {
+        if (current_token == 'b') {
+            match('b');
+            parse_B();
+        } 
+        else if (current_token == 'a') {
+            return;
+        } 
+        else {
+            exit(1);
+        }
+    }
+};
+int main() {
+    cout<<"Enter the string: ";
+    string s;
+    cin>>s;
+    Predictive_P p(s);
+    p.parse();
+    return 0;
+}
