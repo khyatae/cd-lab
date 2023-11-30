@@ -1,0 +1,103 @@
+RDP
+#include <iostream>
+#include <string>
+using namespace std;
+
+int E();
+int Edash();
+int T();
+int Tdash();
+int F();
+const char* cursor;
+
+string input;
+int main() {
+    cout << "Enter the string: ";
+    cin >> input;
+    cursor = input.c_str();
+    cout << "\nInput            Action" << endl << endl;
+    if (E() && *cursor == '\0') {
+        cout << endl << "String is successfully parsed" << endl;
+        return 0;
+    } else {
+        cout << endl << "Error in parsing String" << endl << endl;
+        return 1;
+    }
+}
+
+// Grammar rule: E -> T E'
+int E() {
+    printf("%-16s E -> T E'\n", cursor);
+    if (T()) {
+        if (Edash())
+            return 1;
+        else
+            return 0;
+    } else
+        return 0;
+}
+// Grammar rule: E' -> + T E' | $
+int Edash() {
+    if (*cursor == '+') {
+        printf("%-16s E' -> + T E'\n", cursor);
+        cursor++;
+        if (T()) {
+            if (Edash())
+                return 1;
+            else
+                return 0;
+        } else
+            return 0;
+    } else {
+        printf("%-16s E' -> $\n", cursor);
+        return 1;
+    }
+}
+// Grammar rule: T -> F T'
+int T() {
+    printf("%-16s T -> F T'\n", cursor);
+    if (F()) {
+        if (Tdash())
+            return 1;
+        else
+            return 0;
+    } else
+        return 0;
+}
+// Grammar rule: T' -> * F T' | $
+int Tdash() {
+    if (*cursor == '*') {
+        printf("%-16s T' -> * F T'\n", cursor);
+        cursor++;
+        if (F()) {
+            if (Tdash())
+                return 1;
+            else
+                return 0;
+        } else
+            return 0;
+    } else {
+        printf("%-16s T' -> $\n", cursor);
+        return 1;
+    }
+}
+// Grammar rule: F -> ( E ) | i
+int F() {
+    if (*cursor == '(') {
+        printf("%-16s F -> ( E )\n", cursor);
+        cursor++;
+        if (E()) {
+            if (*cursor == ')') {
+                cursor++;
+                return 1;
+            } else
+                return 0;
+        } else
+            return 0;
+    } else if (*cursor == 'i') {
+        printf("%-16s F -> i\n", cursor);
+        cursor++;
+        return 1;
+    }
+    return 0;
+}
